@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "region_id": "green_plains",
+  "stages": [
+    {
+      "number": 1,
+      "kind": "normal",
+      "enemies": [
+        "slime"
+      ]
+    },
+    {
+      "number": 2,
+      "kind": "normal",
+      "enemies": [
+        "slime",
+        "slime"
+      ]
+    },
+    {
+      "number": 3,
+      "kind": "normal",
+      "enemies": [
+        "boar"
+      ]
+    },
+    {
+      "number": 4,
+      "kind": "normal",
+      "enemies": [
+        "wolf",
+        "slime"
+      ]
+    },
+    {
+      "number": 5,
+      "kind": "elite",
+      "enemies": [
+        "elite_boar"
+      ]
+    },
+    {
+      "number": 6,
+      "kind": "normal",
+      "enemies": [
+        "mushroom",
+        "slime"
+      ]
+    },
+    {
+      "number": 7,
+      "kind": "normal",
+      "enemies": [
+        "wolf",
+        "wolf"
+      ]
+    },
+    {
+      "number": 8,
+      "kind": "normal",
+      "enemies": [
+        "mushroom",
+        "boar"
+      ]
+    },
+    {
+      "number": 9,
+      "kind": "normal",
+      "enemies": [
+        "wolf",
+        "mushroom",
+        "slime"
+      ]
+    },
+    {
+      "number": 10,
+      "kind": "boss",
+      "enemies": [
+        "alpha_wolf"
+      ]
+    }
+  ]
+}
