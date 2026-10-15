@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "skills": [
+    {"id":"stone_shot","name":"Pedra","effect":"damage","power":17,"cooldown":1.8,"trigger":"always","color":"#D7BE83"},
+    {"id":"earth_barrier","name":"Barreira Terrestre","effect":"shield","power":23,"cooldown":12.0,"trigger":"ally_below_70","color":"#E4C18B"},
+    {"id":"stone_cannon","name":"Canhao de Pedra","effect":"break_armor","power":40,"cooldown":9.0,"trigger":"elite_or_boss","color":"#D6A55B"},
+    {"id":"wind_bolt","name":"Rajada de Vento","effect":"damage","power":8,"cooldown":1.9,"trigger":"always","color":"#B8FFE5"},
+    {"id":"healing_wave","name":"Onda de Cura","effect":"heal","power":36,"cooldown":4.7,"trigger":"ally_below_80","color":"#78F2AB"},
+    {"id":"protective_wind","name":"Vento Protetor","effect":"shield","power":30,"cooldown":9.5,"trigger":"boss_telegraph","color":"#B1EEFF"},
+    {"id":"water_bolt","name":"Jato de Agua","effect":"wet","power":13,"cooldown":2.2,"trigger":"always","color":"#63D4FA"},
+    {"id":"frost_bind","name":"Prisao de Gelo","effect":"freeze","power":27,"cooldown":6.5,"trigger":"wet_target","color":"#ACEBFF"},
+    {"id":"ice_storm","name":"Tempestade de Gelo","effect":"aoe","power":19,"cooldown":8.0,"trigger":"multiple_enemies","color":"#C2EFFF"},
+    {"id":"sword_slash","name":"Corte","effect":"damage","power":22,"cooldown":1.6,"trigger":"always","color":"#FFF0CF"},
+    {"id":"swift_lunge","name":"Investida","effect":"damage","power":33,"cooldown":5.8,"trigger":"enemy_below_60","color":"#FFDBB0"},
+    {"id":"sword_combo","name":"Combo da Espada","effect":"strike","power":52,"cooldown":8.0,"trigger":"armor_broken","color":"#FFBC8A"}
+  ]
+}
