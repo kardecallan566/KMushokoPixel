@@ -1,27 +1,26 @@
-# KMushokoPixel
+# KMushokoPixel — CP01A Visual Pilot
 
-RPG idle 2D de exploração lateral em **Godot 4.x**, com janela compacta de desktop e modo expandido para gerenciamento. Projeto fan-made em pré-produção, inspirado em *Mushoku Tensei*, no vídeo de referência compartilhado pelo criador (direção visual) e em *Task Bar Hero* (progressão e desktop companion).
+**Godot 4.x** 2D side-scrolling idle RPG fan project based on the **specific attached Reel**'s style, with a desktop-companion compact window and expanded preview. The artwork in this branch is original pilot art for feedback, **not yet approved final sprites**.
 
-**Primeiro quarteto:** Rudeus (mago de artilharia), Sylphie (maga de suporte), Roxy (maga elementalista) e Eris (guerreira). Mesmo pertencendo à classe mago, Rudeus, Sylphie e Roxy têm funções, lógica de IA e habilidades distintas.
+## Launch
 
-## Comece aqui
+1. Use Godot 4.3 or newer on Windows (Linux/macOS also supported in principle).
+2. Import `project.godot` and press F5. **Artwork PNGs are included in the project release ZIP.**
+3. To regenerate the same originals from text code, run `python -m pip install Pillow` then `python tools/generate_assets.py`.
 
-- [Game Design Document](docs/GDD.md): loop, fases, bosses, equipamentos, economia, modo híbrido e arquitetura.
-- [Art Bible](docs/ART_BIBLE.md): fidelidade ao Reel, paleta, escala, animações e aprovação.
-- [Classes e personagens](docs/CHARACTERS_AND_CLASSES.md): papéis, habilidades e expansão futura.
-- [Roadmap](docs/ROADMAP.md): checkpoints e critérios de aceite.
-- [Contrato de dados](docs/DATA_CONTRACT.md): esquemas versionados e próximos passos.
-- `data/characters.json`: elenco inicial.
-- `data/stages.json`: fases 1–10 e primeiro boss.
+## Controls
 
-## Verificação
+| Control | Behavior |
+| --- | --- |
+| `Tab` | Compact / expanded window |
+| `Space` | Pause / resume walking |
+| `1` | Rudeus art review overlay |
+| `2` | Return to party view |
+| `H` | Show/hide HUD |
+| `T` | Toggle always-on-top for compact |
+| Drag top strip | Reposition compact window |
+| Click top-right | Toggle mode / pause |
 
-```sh
-python tools/validate_data.py
-```
+**What exists:** a layered 2D pixel scene, four pilot characters, walk and idle animation frames, parallax and window modes. **What does not exist yet:** enemies, combat, stages, quests, progression, inventory and save files.
 
-**Estado:** somente planejamento e dados; ainda não há cena Godot jogável nem sprites definitivos aprovados. A arte de protótipos anteriores não será usada como definitiva.
-
-## Direitos e licenciamento
-
-Os personagens de *Mushoku Tensei* pertencem aos respectivos titulares. O Reel é referência artística, não uma licença de redistribuição de sprites, trilha ou cenas. Produzir novos assets autorais e verificar permissões antes de publicar/comercializar.
+Project plans remain in `docs/` from CP00. See `docs/CP01A_IMPLEMENTATION.md` for acceptance tests and limitations. Never treat pilot sprites as approved until they are reviewed alongside the Reel.
