@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "party_walk_order": [
+    "rudeus",
+    "sylphie",
+    "roxy",
+    "eris"
+  ],
+  "characters": [
+    {
+      "id": "rudeus",
+      "name": "Rudeus",
+      "class": "mage",
+      "specialization": "burst_controller",
+      "combat_position": "mid",
+      "element_tags": [
+        "earth",
+        "water"
+      ],
+      "ai_priority": [
+        "break_armor",
+        "focus_boss",
+        "basic_attack"
+      ],
+      "skills": [
+        "stone_shot",
+        "earth_barrier",
+        "stone_cannon"
+      ],
+      "art_status": "reference_only"
+    },
+    {
+      "id": "sylphie",
+      "name": "Sylphie",
+      "class": "mage",
+      "specialization": "healer_support",
+      "combat_position": "back",
+      "element_tags": [
+        "wind",
+        "healing"
+      ],
+      "ai_priority": [
+        "emergency_heal",
+        "boss_shield",
+        "basic_attack"
+      ],
+      "skills": [
+        "wind_bolt",
+        "healing_wave",
+        "protective_wind"
+      ],
+      "art_status": "reference_only"
+    },
+    {
+      "id": "roxy",
+      "name": "Roxy",
+      "class": "mage",
+      "specialization": "elemental_controller",
+      "combat_position": "back",
+      "element_tags": [
+        "water",
+        "ice"
+      ],
+      "ai_priority": [
+        "crowd_control",
+        "apply_wet",
+        "basic_attack"
+      ],
+      "skills": [
+        "water_bolt",
+        "frost_bind",
+        "ice_storm"
+      ],
+      "art_status": "reference_only"
+    },
+    {
+      "id": "eris",
+      "name": "Eris",
+      "class": "warrior",
+      "specialization": "frontline_duelist",
+      "combat_position": "front",
+      "element_tags": [
+        "physical"
+      ],
+      "ai_priority": [
+        "intercept",
+        "focus_weakened",
+        "basic_attack"
+      ],
+      "skills": [
+        "sword_slash",
+        "swift_lunge",
+        "sword_combo"
+      ],
+      "art_status": "reference_only"
+    }
+  ]
+}
