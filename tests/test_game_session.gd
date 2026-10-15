@@ -46,6 +46,13 @@ func _run() -> void:
     if game.stage_number != stage_before:
         _fail("Pause changed stage")
         return
+    # Save roundtrip: a fresh session must load the persisted victory.
+    game.save_progress()
+    var restored = GameSession.new(true)
+    restored.auto_save = false
+    if restored.highest_cleared != 10 or restored.gold != game.gold:
+        _fail("Save/load roundtrip lost stage or gold")
+        return
     var clone = GameSession.new(false)
     clone.auto_save = false
     if clone.highest_cleared != 0:

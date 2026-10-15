@@ -66,10 +66,13 @@ func _update_layout() -> void:
     var positions := [0.13,0.35,0.58,0.80] if traveling else [0.08,0.20,0.32,0.44]
     for i in range(heroes.size()):
         heroes[i].position = Vector2(round(visible_size.x * positions[i]),baseline)
-        heroes[i].preview_scale = 1.35 if window_mode.compact else 1.30
+        heroes[i].preview_scale = 1.0 if window_mode.compact else 1.30
         heroes[i].queue_redraw()
     for i in range(enemies.size()):
         enemies[i].position = Vector2(round(visible_size.x*(0.68 + 0.11*i)),baseline + 1)
+        if i < session.enemies.size():
+            var monster: Dictionary = session.enemies[i]
+            enemies[i].sprite_scale = (0.70 if window_mode.compact else 1.30) if bool(monster.get("boss",false)) else (0.95 if window_mode.compact else 1.0) * float(monster.get("scale",1.0))
     _control_button = Rect2(visible_size.x-31,4,27,18)
     _pause_button = Rect2(visible_size.x-60,4,26,18)
     _upgrade_button = Rect2(5,visible_size.y-23,98,18)
