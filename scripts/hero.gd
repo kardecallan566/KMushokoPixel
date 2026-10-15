@@ -11,6 +11,11 @@ var walking := true
 var elapsed := 0.0
 var anim_fps := 8.0
 var _sheet: Texture2D
+var attack_flash := 0.0
+
+func play_attack() -> void:
+    attack_flash = 0.30
+    queue_redraw()
 
 func configure(id: String) -> void:
     hero_id = id
@@ -22,6 +27,7 @@ func configure(id: String) -> void:
     queue_redraw()
 
 func _process(delta: float) -> void:
+    attack_flash = maxf(0.0,attack_flash - delta)
     if walking:
         elapsed = fmod(elapsed + delta, 600.0)
     else:
@@ -41,4 +47,7 @@ func _draw() -> void:
     # Anchor source feet at y=54 and x=24; pixel-snap viewport transforms.
     var destination := Rect2(-24.0 * preview_scale, -54.0 * preview_scale,
         FRAME_SIZE.x * preview_scale, FRAME_SIZE.y * preview_scale)
+    if attack_flash > 0:
+        destination.position.x += sin(attack_flash * 30.0) * 3.0
+        draw_circle(Vector2(8.0,-30.0),3.0,Color("#F7ECBD"))
     draw_texture_rect_region(_sheet, destination, src)
