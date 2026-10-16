@@ -1,8 +1,8 @@
-; KMushokoPixel — Checkpoint 02 combat prototype
+; KMushokoPixel — Checkpoint 03 combat presentation
 config_version=5
 
 [application]
-config/name="KMushokoPixel — CP02 Pixel RPG"
+config/name="KMushokoPixel — CP03 Pixel RPG"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 

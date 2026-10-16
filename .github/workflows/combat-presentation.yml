@@ -1,0 +1,35 @@
+name: CP03 Combat Presentation
+on:
+  push:
+    paths:
+      - 'scripts/**'
+      - 'tests/test_boss_mechanics.gd'
+      - 'project.godot'
+      - '.github/workflows/combat-presentation.yml'
+  pull_request:
+    paths:
+      - 'scripts/**'
+      - 'tests/test_boss_mechanics.gd'
+      - 'project.godot'
+      - '.github/workflows/combat-presentation.yml'
+permissions:
+  contents: read
+jobs:
+  godot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.5.1
+        run: |
+          curl --fail --location --retry 3 --silent --show-error -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d /tmp
+          sudo install -m 755 /tmp/Godot_v4.5.1-stable_linux.x86_64 /usr/local/bin/godot
+      - name: Import and parse project
+        run: godot --headless --editor --path . --quit
+      - name: Verify boss second phase, telegraphs, and FX
+        run: godot --headless --path . --script res://tests/test_boss_mechanics.gd
+      - name: Regression - stages, equipment-free save and abilities
+        run: godot --headless --path . --script res://tests/test_game_session.gd
+      - name: Frame smoke test
+        run: godot --headless --path . --quit-after 180

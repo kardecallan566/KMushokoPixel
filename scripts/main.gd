@@ -8,6 +8,7 @@ const EnemySprite = preload("res://scripts/enemy.gd")
 const WindowMode = preload("res://scripts/window_mode.gd")
 const GameSession = preload("res://scripts/combat/game_session.gd")
 const Hud = preload("res://scripts/hud.gd")
+const CombatFx = preload("res://scripts/fx/combat_fx.gd")
 const PARTY := ["rudeus", "sylphie", "roxy", "eris"]
 const NAMES := ["RUDEUS", "SYLPHIE", "ROXY", "ERIS"]
 const ROLES := ["ARTILHARIA", "SUPORTE", "CONTROLE", "GUERREIRA"]
@@ -17,6 +18,7 @@ var session = GameSession.new()
 var background: Node2D
 var foreground: Node2D
 var hud
+var combat_fx: Node2D
 var heroes: Array = []
 var enemies: Array = []
 var hud_visible := true
@@ -48,15 +50,19 @@ func _ready() -> void:
         actor.z_index = 3
         add_child(actor)
         heroes.append(actor)
+    combat_fx = CombatFx.new()
+    combat_fx.z_index = 12
+    add_child(combat_fx)
     hud = Hud.new()
     hud.game = self
     hud.z_index = 20
     add_child(hud)
     session.encounter_started.connect(_on_encounter_started)
+    session.enemy_summoned.connect(_on_enemy_summoned)
     session.action_performed.connect(_on_action)
     session.phase_changed.connect(_on_phase_changed)
     session.progress_changed.connect(queue_redraw)
-    get_window().title = "KMushokoPixel — CP02 | Planicies Verdes"
+    get_window().title = "KMushokoPixel — CP03 | Planicies Verdes"
     get_window().size_changed.connect(_update_layout)
     _update_layout()
 
@@ -81,7 +87,9 @@ func _update_layout() -> void:
         heroes[i].preview_scale = 1.0
         heroes[i].queue_redraw()
     for i in range(enemies.size()):
-        enemies[i].position = Vector2(round(visible_size.x * (0.75 + 0.10*i)),int(baseline))
+        # Reinforcements share the right side; never leave the viewport.
+        var enemy_x: float = visible_size.x * (0.74 + min(i,3)*0.075)
+        enemies[i].position = Vector2(round(enemy_x),int(baseline))
         if i < session.enemies.size():
             enemies[i].sprite_scale = 1.0
             enemies[i].queue_redraw()
@@ -90,11 +98,14 @@ func _update_layout() -> void:
     _pause_button = Rect2(visible_size.x - 58,2,26,bar_height-3)
     _upgrade_button = Rect2(4,visible_size.y-17,86,14)
     _farm_button = Rect2(94,visible_size.y-17,76,14)
+    if combat_fx != null:
+        combat_fx.resize_to(visible_size, baseline)
     if hud != null:
         hud.queue_redraw()
 
 func _process(delta: float) -> void:
     session.tick(delta)
+    combat_fx.running = not session.paused
     if session.phase in ["travel","victory","defeat"] and not session.paused:
         scroll_time = fmod(scroll_time + delta*19.0,96000.0)
     background.camera_scroll = scroll_time
@@ -134,6 +145,14 @@ func _on_encounter_started(stage_no: int, models: Array) -> void:
     _status_time = 4.0
     _update_layout()
 
+func _on_enemy_summoned(data: Dictionary) -> void:
+    var visual = EnemySprite.new()
+    visual.configure(data)
+    visual.z_index = 3
+    add_child(visual)
+    enemies.append(visual)
+    _update_layout()
+
 func _on_phase_changed(new_phase: String) -> void:
     if new_phase == "victory":
         _status_color = Color("#B5FFC5")
@@ -150,6 +169,21 @@ func _on_action(action: Dictionary) -> void:
     _status_text = String(action.get("text",""))
     _status_color = Color(String(action.get("color","#FFFFFF")))
     _status_time = 1.4 if action.get("kind") not in ["reward","defeat"] else 3.0
+    var source := Vector2(visible_size.x*0.81,baseline-27)
+    var target := Vector2(visible_size.x*0.78,baseline-30)
+    var source_id: String = String(action.get("hero",""))
+    var hero_index: int = PARTY.find(source_id)
+    if hero_index >= 0:
+        source = heroes[hero_index].position + Vector2(0,-28)
+    if action.get("kind") == "enemy":
+        target = source if hero_index >= 0 else Vector2(visible_size.x*0.33,baseline-25)
+        source = _enemy_position(String(action.get("target","")))
+    elif action.get("kind") in ["heal","shield"]:
+        var ally_i: int = PARTY.find(String(action.get("target","")))
+        target = heroes[ally_i].position if ally_i >= 0 else source
+    else:
+        target = _enemy_position(String(action.get("target","")))
+    combat_fx.on_battle_action(action,source,target)
     if action.has("hero") and action.get("kind") != "enemy":
         var i := PARTY.find(String(action["hero"]))
         if i >= 0:
@@ -159,6 +193,12 @@ func _on_action(action: Dictionary) -> void:
             "amount":int(action.get("amount",0)),"color":_status_color,"life":0.7})
         if _flashes.size()>22:
             _flashes.pop_front()
+
+func _enemy_position(enemy_id: String) -> Vector2:
+    for i in range(mini(session.enemies.size(),enemies.size())):
+        if String(session.enemies[i].get("id","")) == enemy_id:
+            return enemies[i].position + Vector2(0,-28)
+    return Vector2(visible_size.x*0.8,baseline-30)
 
 func _toggle_window() -> void:
     window_mode.apply(get_window(),not window_mode.compact)

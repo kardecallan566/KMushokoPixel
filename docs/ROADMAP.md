@@ -1,21 +1,16 @@
-# Roadmap e critérios de aceite
+# Roadmap e gates de aprovação
 
-| Checkpoint | Entrega | Condição para concluir |
-| --- | --- | --- |
-| **CP00** | Pré-produção: GDD, Art Bible, roster, 10 fases e teste de dados | Revisão e PR de documentação |
-| **CP01A** | Prova de arte: Rudeus idle/walk, comparação lado a lado com Reel | Aprovação visual explícita |
-| **CP01B** | Rudeus/Sylphie/Roxy/Eris, cenário planícies, paralaxe | Reconhecimento, cores e ritmo iguais à direção aprovada |
-| **CP01C** | Janela compacta/expandida com estado único | Alternar sem resetar a sessão |
-| **CP02** | Combate automático, 4 monstros e feedback de dano | Heróis lutam nos dois modos |
-| **CP03** | Fases 1–10, elite 5, Lobo Alfa no boss 10, farm | Loop jogável de vitória/derrota |
-| **CP04** | Magias, prioridades táticas, sinergias e FX | Todos os heróis têm utilidade clara |
-| **CP05** | XP, níveis, inventário, equipamentos, raridades | Builds têm impacto real |
-| **CP06** | Save/load e recompensa offline limitada | Persistência sem duplicação |
-| **CP07** | Planícies 11–30, bosses 20/30 | Primeira região completa |
-| **CP08** | HUD, áudio, acessibilidade, desempenho | Janela compacta leve e não intrusiva |
-| **CP09** | Floresta e ruínas, fases 31–90 | Conteúdo por dados, sem duplicar código |
-| **CP10** | Publicação após validação técnica/legal | Release candidate |
+- **CP00:** GDD, Art Bible, sistema de classes, dados iniciais e validação automatizada (esta entrega).
+- **CP01A:** arte piloto Rudeus + comparativo A/B com Reel; aprovação obrigatória.
+- **CP01B:** Rudeus, Sylphie, Roxy, Eris andando + cenário de planícies com paralaxe; aprovação visual.
+- **CP01C:** modo compacto/expandido com uma única sessão de jogo e posicionamento persistido.
+- **CP02:** monstros com IA, combate automático, vida, dano e feedback coerentes.
+- **CP03:** 10 fases, elite fase 5, boss fase 10, derrota/farm/drop.
+- **CP04:** habilidades, prioridades de IA, sinergias entre os quatro.
+- **CP05:** níveis, equipamentos, inventário e progressão.
+- **CP06:** save seguro, farm offline limitado, recuperação e testes.
+- **CP07:** mais 20 fases, bosses fases 20 e 30 e polimento da região.
+- **CP08–10:** UX/performance, regiões 2–3, distribuição após revisão de licenciamento.
 
-**Vertical slice:** primeiro entregar 1 cenário fiel, 4 heróis, 4 monstros, 10 fases, 1 elite, 1 boss, loot/XP simplificados, save, modo híbrido. NÃO iniciar 90 fases antes da aprovação visual.
-
-**Fluxo:** branch por checkpoint -> testes -> screenshots/gravações de comparação -> PR -> revisão -> merge na main. NENHUM asset do protótipo anterior está automaticamente aprovado.
+## Guardrails
+Não integrar em `main` sem o gate de visual do CP01A/01B; não reaproveitar arte provisória de outro projeto como definitiva. Para cada checkpoint: branch, testes, PR e screenshots. Formato de versões de dados documentado; sem credenciais ou arte de terceiros incorporadas por acidente.

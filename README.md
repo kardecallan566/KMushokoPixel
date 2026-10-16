@@ -1,4 +1,4 @@
-# KMushokoPixel — Checkpoint 02
+# KMushokoPixel — Checkpoint 03
 
 **RPG idle lateral em pixel art para Godot 4.5.1**, com visual inspirado no Reel de referência (Rudeus, Sylphie, Roxy e Eris) e ciclo de fases/chefes inspirado em Task Bar Hero.
 
@@ -21,6 +21,18 @@ Corrigimos escalas fracionárias, ancoragem dos sprites no chão, camadas de ren
 - **Diferenciais:** HUD independente da vegetação, efeitos de magia próprios e pés alinhados.
 
 O foco aqui é **correção técnica e consistência visual**. O refinamento artístico completo para atingir a qualidade do Reel ainda será feito com comparação quadro a quadro. [Detalhes do CP02B](docs/CP02B_VISUAL_REFINEMENT.md).
+
+## CP03 — Combate visível e chefe com duas fases
+
+- Efeitos pixel art **no cenário**: pedras voando (Rudeus), água/gelo (Roxy), cruzes de cura e escudos (Sylphie), cortes de espada (Eris) e golpes de inimigos.
+- Os sinais de perigo aparecem **antes** do dano do Lobo Alfa, inclusive no modo compacto.
+- Ao chegar a 55% de vida, o Lobo Alfa entra na segunda fase, convoca dois lobos e alterna investida e uivo em área; congelamento interrompe a preparação.
+- O módulo visual `scripts/fx/combat_fx.gd` nunca controla o dano: toda a simulação continua em `scripts/combat/game_session.gd`.
+- As artes dos personagens existentes continuam no mesmo estilo e resolução, sem trocar o visual aprovado por assets de terceiros.
+
+**Teste específico:** `godot --headless --path . --script res://tests/test_boss_mechanics.gd`.
+
+Veja [CP03: Batalha e chefe](docs/CP03_BOSS_AND_COMBAT_PRESENTATION.md).
 
 ## Rodar
 
