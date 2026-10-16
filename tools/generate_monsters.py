@@ -58,6 +58,14 @@ def monster(kind,frame):
 
 for kind,(w,h) in SIZES.items():
     sheet=Image.new('RGBA',(w*4,h))
-    for frame in range(4):sheet.paste(monster(kind,frame),(frame*w,0))
+    # Use the SAME shift for all frames, preserving bounce/walk animation.
+    base_bounds = monster(kind,0).getchannel('A').getbbox()
+    shift_y = (h - 3) - base_bounds[3]
+    shift_x = -2 if base_bounds[2] >= w - 1 else 0
+    for frame in range(4):
+        image = monster(kind,frame)
+        grounded = Image.new('RGBA',(w,h),(0,0,0,0))
+        grounded.paste(image,(shift_x,shift_y))
+        sheet.paste(grounded,(frame*w,0))
     sheet.save(DIR/f'{kind}_sheet.png',optimize=True)
 print('Generated',len(SIZES),'8-bit styled enemy sheets in',DIR)

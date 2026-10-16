@@ -143,6 +143,29 @@ def generate_hero(name, anim, step):
         poly(d,[(8,23+y),(9,16+y),(13,14+y),(16,7+y),(19,10+y),(24,9+y),(30,13+y),(31,20+y),(27,25+y),(23,19+y),(19,24+y),(16,19+y),(12,27+y)],'e_hair')
         poly(d,[(12,16+y),(17,10+y),(18,15+y),(22,12+y),(27,16+y),(29,19+y),(24,18+y),(21,21+y),(17,17+y),(13,21+y)],'e_light',None)
         rect(d,(9,23+y,11,27+y),'e_shadow')
+    # Pixel-level costume polish, consistent between idle and walk frames.
+    # These accents are actual authored pixel clusters, not a post-scale filter.
+    if name == 'rudeus':
+        rect(d,(19,36+y,21,38+y),'#E3C99F')
+        rect(d,(21,40+y,23,42+y),'#565064')
+        rect(d,(16,46+y,19,46+y),'#EEE5D5')
+        rect(d,(8,30+y,9,31+y),'#DCF9FC')
+        rect(d,(8,34+y,10,34+y),'#2F9BF4')
+    elif name == 'sylphie':
+        rect(d,(18,31+y,20,33+y),'#D6E8C2')
+        rect(d,(19,39+y,21,39+y),'#4A6B60')
+        rect(d,(30,42+y,33,43+y),'#6B3948')
+        rect(d,(13,13+y,14,14+y),'#FFFFFF')
+    elif name == 'roxy':
+        rect(d,(21,20+y,24,20+y),'#ACB4DF')
+        rect(d,(25,17+y,27,18+y),'#F5E6C8')
+        rect(d,(22,35+y,24,36+y),'#A8B8DC')
+        rect(d,(36+sway,38+y,37+sway,40+y),'#85AEF9')
+    elif name == 'eris':
+        rect(d,(20,35+y,24,36+y),'#C39878')
+        rect(d,(21,42+y,23,43+y),'#986E66')
+        rect(d,(39,36+y,40,36+y),'#FFFFFF')
+        rect(d,(20,12+y,22,13+y),'#FF8C63')
     return im
 
 FRAME_W,FRAME_H=48,60

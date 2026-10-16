@@ -8,6 +8,7 @@ var foreground := false
 var _tex := {}
 
 func _ready() -> void:
+    texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
     for key in ["clouds", "mountains", "treeline", "meadow", "foreground"]:
         var path := "res://assets/biomes/green_plains/%s.png" % key
         if ResourceLoader.exists(path):
@@ -19,10 +20,10 @@ func _tile(key: String, y: float, speed: float, x_shift: float = 0.0) -> void:
     if not _tex.has(key):
         return
     var texture: Texture2D = _tex[key]
-    var w := float(texture.get_width())
-    var x := -fposmod(camera_scroll * speed, w) + x_shift
-    while x < view_size.x:
-        draw_texture(texture, Vector2(floor(x), floor(y)))
+    var w: int = texture.get_width()
+    var x: int = -int(floor(fposmod(camera_scroll * speed, float(w)))) + int(x_shift)
+    while x < int(ceil(view_size.x)):
+        draw_texture(texture, Vector2(x, floor(y)))
         x += w
 
 func _draw() -> void:

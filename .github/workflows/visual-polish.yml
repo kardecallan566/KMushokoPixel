@@ -1,0 +1,48 @@
+name: CP02B Pixel-Perfect Visual Regression
+on:
+  push:
+    paths:
+      - 'assets/**'
+      - 'scripts/**'
+      - 'tools/generate_assets.py'
+      - 'tools/generate_monsters.py'
+      - 'tools/generate_effects.py'
+      - 'tools/validate_visual_pipeline.py'
+      - '.github/workflows/visual-polish.yml'
+  pull_request:
+    paths:
+      - 'assets/**'
+      - 'scripts/**'
+      - 'tools/generate_assets.py'
+      - 'tools/generate_monsters.py'
+      - 'tools/generate_effects.py'
+      - 'tools/validate_visual_pipeline.py'
+      - '.github/workflows/visual-polish.yml'
+permissions:
+  contents: read
+jobs:
+  assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'Pillow>=10,<13'
+      - run: python tools/validate_visual_pipeline.py
+      - run: python tools/generate_assets.py && python tools/generate_monsters.py && python tools/generate_effects.py
+      - name: Generated assets must match their committed versions
+        run: git diff --exit-code -- assets/
+  godot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.5.1
+        run: |
+          curl --fail --location --retry 3 --silent --show-error -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d /tmp
+          sudo install -m 755 /tmp/Godot_v4.5.1-stable_linux.x86_64 /usr/local/bin/godot
+      - run: godot --headless --editor --path . --quit
+      - run: godot --headless --path . --script res://tests/test_game_session.gd
+      - run: godot --headless --path . --quit-after 120
