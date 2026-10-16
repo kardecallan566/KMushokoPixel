@@ -8,6 +8,20 @@ O projeto mantém o cenário de paralaxe e o quarteto do CP01A. Agora é **jogá
 
 *Prévia acima é uma composição ilustrativa feita com os sprites do projeto, não um screenshot direto do editor Godot.*
 
+## Checkpoint 02B — restauração da pixel art
+
+Corrigimos escalas fracionárias, ancoragem dos sprites no chão, camadas de renderização do HUD e efeitos de combate. Os personagens continuam na ordem visual do Reel e as funções do RPG foram preservadas.
+
+![Prévia do novo layout compacto e expandido](PREVIEW_CP02B_VISUAL.png)
+
+*Comparação de layout feita com os sprites reais e em escala inteira (não é captura da execução no Godot).*
+
+- **Expandido:** 384×216 pixels lógicos × 3 = 1152×648.
+- **Compacto:** 480×120 pixels lógicos × 2 = 960×240.
+- **Diferenciais:** HUD independente da vegetação, efeitos de magia próprios e pés alinhados.
+
+O foco aqui é **correção técnica e consistência visual**. O refinamento artístico completo para atingir a qualidade do Reel ainda será feito com comparação quadro a quadro. [Detalhes do CP02B](docs/CP02B_VISUAL_REFINEMENT.md).
+
 ## Rodar
 
 Abra `project.godot` no Godot 4.x e pressione **F5**. Os personagens caminham, encontram inimigos, lutam e avançam automaticamente. Com a janela em qualquer modo, o combate é o mesmo.
@@ -31,6 +45,8 @@ python tools/validate_data.py
 python tools/validate_assets.py
 python tools/validate_combat_data.py
 python tools/generate_monsters.py
+python tools/generate_effects.py
+python tools/validate_visual_pipeline.py
 godot --headless --editor --path . --quit
 godot --headless --path . --script res://tests/test_game_session.gd
 godot --headless --path . --quit-after 120
