@@ -221,7 +221,9 @@ func _unhandled_input(event: InputEvent) -> void:
                 if window_mode.compact: _toggle_window()
         get_viewport().set_input_as_handled()
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-        var point := event.position/logical_scale
+        # Explicitly narrow the event type: Godot 4.7 cannot infer Vector2 here.
+        var mouse_event: InputEventMouseButton = event as InputEventMouseButton
+        var point: Vector2 = mouse_event.position / logical_scale
         if _control_button.has_point(point):
             _toggle_window()
         elif _pause_button.has_point(point):
