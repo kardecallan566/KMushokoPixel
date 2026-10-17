@@ -34,6 +34,32 @@ O foco aqui é **correção técnica e consistência visual**. O refinamento art
 
 Veja [CP03: Batalha e chefe](docs/CP03_BOSS_AND_COMBAT_PRESENTATION.md).
 
+## CP03C — Reboot visual (em avaliação)
+
+![Estudo de fidelidade dos quatro heróis](PREVIEW_HEROES_CP03C.png)
+
+Nesta branch foram substituídas as versões genéricas dos quatro heróis por **sprites de estudo extraídos/reconstruídos da referência em vídeo**, com quatro poses de caminhada, variações de repouso, casting e reação. As poses de referência olham para a esquerda; a exploração desloca o cenário para a direita e o combate inverte a orientação para encarar os inimigos. O gerador de sprites agora usa arquivos-fonte em `assets/characters/source/` para que o CI **não sobrescreva a arte**.
+
+Também foram refeitos os seis monstros, a HUD (topbar + cartões menores de HP, sem cobrir a ação), os detalhes de gramado e o renderizador de efeitos para suporte a fogo, água, vento, gelo, terra, cura, escudos, espada e flechas futuras.
+
+### Direitos dos materiais de referência
+
+O Reel enviado é uma referência **não licenciada para reutilização pública**. Os sprites reconstruídos a partir dos seus quadros são **assets temporários de estudo**, não autorizados para publicação comercial. Antes de distribuir o jogo, será necessário confirmar autorização para personagens e imagens, ou substituí-los por assets próprios aprovados. O sprite de estudo não é um desenho original independente do Reel. Nenhum vídeo completo foi incluído.
+
+### Como testar
+
+```sh
+python -m pip install 'Pillow>=10,<13'
+python tools/validate_assets.py
+python tools/validate_visual_pipeline.py
+godot --headless --path . --script res://tests/test_asset_loading.gd
+godot --headless --editor --path . --quit
+godot --headless --path . --script res://tests/test_visual_reboot.gd
+godot .
+```
+
+A apresentação 8-bit é um trabalho em evolução: primeiro validar movimento em Windows e HUD nos dois modos; depois redesenhar as peças a partir das referências como **arte original de produção**. A lógica das fases, cooldowns e salvamento permanece a do CP03.
+
 ## Rodar
 
 Abra `project.godot` no Godot 4.x e pressione **F5**. Os personagens caminham, encontram inimigos, lutam e avançam automaticamente. Com a janela em qualquer modo, o combate é o mesmo.
@@ -66,21 +92,21 @@ godot --headless --path . --quit-after 120
 
 Veja [detalhes e limitações do checkpoint](docs/CP02_IMPLEMENTATION.md), [planejamento de jogo](docs/GDD.md) e [direção visual fiel ao Reel](docs/ART_BIBLE.md).
 
-**Status artístico:** o estilo é uma primeira aproximação do Reel, não uma cópia perfeita. Os sprites continuam passíveis de refinamento visual. Não há imagens copiadas do vídeo nas assets do jogo. Personagens de Mushoku Tensei pertencem a seus detentores e requerem atenção aos direitos antes da distribuição.
+**Status artístico:** o estilo é uma primeira aproximação do Reel, não uma cópia perfeita. Os sprites continuam passíveis de refinamento visual. O CP03C contém sprites de estudo derivados de quadros do Reel fornecido pelo usuário. Esses sprites são temporários, sujeitos a autorização e não estão licenciados para distribuição comercial. Personagens de Mushoku Tensei pertencem a seus detentores e requerem atenção aos direitos antes da distribuição.
 
-## Correção do primeiro início após git clone (Godot 4.7.2)
+## Primeira execução após o clone (Godot 4.7.2)
 
-No primeiro `godot .`, o cache `.godot/imported` ainda pode não existir.
-O jogo agora tenta carregar as texturas importadas e, quando o cache está
-ausente, lê os PNGs reais de `assets/` com `Image.load`. Assim, céu,
-montanhas, árvores, heróis e monstros não viram retângulos de emergência.
+O jogo suporta executar `godot .` diretamente sem importar recursos no editor.
+As texturas PNG são carregadas pelo Godot normalmente quando importadas; sem cache
+`.godot/`, um carregador alternativo lê os PNGs do repositório e cria as texturas.
+Isso evita os retângulos de emergência e os avisos de parallax ausente.
 
-Verifique a instalação limpa **antes de abrir o editor**:
+Teste rápido, **antes de abrir o editor**, no diretório do projeto:
 
 ```sh
 godot --headless --path . --script res://tests/test_asset_loading.gd
 godot .
 ```
 
-O teste confere os 19 PNGs essenciais e falha se qualquer textura não carregar.
-O GitHub Actions executa esse teste antes do processo de importação do Godot.
+Se o teste relatar PNG inexistente, verifique os arquivos no diretório `assets/`.
+Não é necessário copiar a pasta `.godot/` de outro computador.

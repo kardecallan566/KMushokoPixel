@@ -45,11 +45,19 @@ func on_battle_action(action: Dictionary, start: Vector2, destination: Vector2) 
         fx_kind = "cross"
         duration = 0.75
     elif kind == "damage":
-        match owner:
-            "rudeus": fx_kind = "stone"
-            "roxy": fx_kind = "ice" if String(action.get("effect","")) in ["freeze","aoe"] else "water"
-            "eris": fx_kind = "slash"
-            "sylphie": fx_kind = "wind"
+        var element: String = String(action.get("element",action.get("effect","")))
+        if element in ["fire","flame","burn"]:
+            fx_kind = "fire"
+        elif element in ["arrow","bolt","projectile_arrow"]:
+            fx_kind = "arrow"
+        elif element in ["air","wind","gust"]:
+            fx_kind = "wind"
+        else:
+            match owner:
+                "rudeus": fx_kind = "stone"
+                "roxy": fx_kind = "ice" if String(action.get("effect","")) in ["freeze","aoe"] else "water"
+                "eris": fx_kind = "slash"
+                "sylphie": fx_kind = "wind"
         duration = 0.42
     else:
         return
@@ -107,6 +115,16 @@ func _draw() -> void:
                 _square(position_now+Vector2(-10,-1),Vector2(3,2),Color("#B9FBFF"))
                 if kind == "ice":
                     _square(position_now+Vector2(4,-8),Vector2(2,5),Color("#F2FFFF"))
+            "fire":
+                var flame_lift: float = 4.0 + floor(ratio*7.0)
+                _square(position_now+Vector2(-4,-int(flame_lift)),Vector2(8,11),Color("#A6373E"))
+                _square(position_now+Vector2(-2,-int(flame_lift)+2),Vector2(5,8),Color("#FF924A"))
+                _square(position_now+Vector2(0,-int(flame_lift)+4),Vector2(3,4),Color("#FFE3A1"))
+            "arrow":
+                var heading: float = 1.0 if destination.x>=source.x else -1.0
+                _square(position_now+Vector2(-10*heading,-1),Vector2(11,2),Color("#D6C19A"))
+                _square(position_now+Vector2(0, -3),Vector2(5,6),Color("#D3E4E3"))
+                _square(position_now+Vector2(-12*heading,-3),Vector2(3,5),Color("#82ADB7"))
             "wind":
                 _square(position_now+Vector2(-7,-4),Vector2(12,2),Color("#95FCD9"))
                 _square(position_now+Vector2(-10,0),Vector2(10,2),pigment)

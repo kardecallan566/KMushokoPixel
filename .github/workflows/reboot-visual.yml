@@ -1,0 +1,58 @@
+name: CP03C Visual Reboot (Godot 4.7.2)
+on:
+  push:
+    paths:
+      - 'assets/**'
+      - 'scripts/**'
+      - 'tools/**'
+      - 'tests/**'
+      - '.github/workflows/reboot-visual.yml'
+  pull_request:
+    paths:
+      - 'assets/**'
+      - 'scripts/**'
+      - 'tools/**'
+      - 'tests/**'
+      - '.github/workflows/reboot-visual.yml'
+permissions:
+  contents: read
+jobs:
+  assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'Pillow>=10,<13'
+      - run: python tools/validate_assets.py && python tools/validate_visual_pipeline.py
+      - name: Regenerate all original assets deterministically
+        run: |
+          python tools/generate_assets.py
+          python tools/generate_monsters.py
+          python tools/generate_effects.py
+          python tools/build_biome_details.py
+          git diff --exit-code -- assets/
+  godot:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['4.7.2']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot
+        run: |
+          curl --fail --location --retry 3 --silent --show-error -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/${{ matrix.version }}-stable/Godot_v${{ matrix.version }}-stable_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d /tmp
+          sudo install -m 755 /tmp/Godot_v${{ matrix.version }}-stable_linux.x86_64 /usr/local/bin/godot
+      - name: Cold checkout loads all textures
+        run: |
+          test ! -d .godot/imported
+          godot --headless --path . --script res://tests/test_asset_loading.gd
+      - run: godot --headless --editor --path . --quit
+      - run: godot --headless --path . --script res://tests/test_visual_reboot.gd
+      - run: godot --headless --path . --script res://tests/test_boss_mechanics.gd
+      - run: godot --headless --path . --script res://tests/test_game_session.gd
+      - run: godot --headless --path . --quit-after 180

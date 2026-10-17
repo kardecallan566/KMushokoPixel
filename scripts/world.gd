@@ -10,7 +10,7 @@ var _tex := {}
 
 func _ready() -> void:
     texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-    for key in ["clouds", "mountains", "treeline", "meadow", "foreground"]:
+    for key in ["clouds", "mountains", "treeline", "meadow", "details", "foreground"]:
         var path := "res://assets/biomes/green_plains/%s.png" % key
         var texture: Texture2D = TextureLoader.load_png(path)
         if texture != null:
@@ -35,5 +35,6 @@ func _draw() -> void:
         _tile("treeline", ground_y - 42.0, 0.30)
         draw_rect(Rect2(0, ground_y - 8.0, view_size.x, view_size.y - ground_y + 8.0), Color("#89C347"))
         _tile("meadow", ground_y - 8.0, 0.92)
+        _tile("details", ground_y - 24.0, 0.92)
     else:
         _tile("foreground", ground_y + 12.0, 1.12)
