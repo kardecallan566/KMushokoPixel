@@ -33,12 +33,16 @@ def paint(name):
             bounce=0;shift=0;state='cast'
         else:
             bounce=0;shift=0;state='hit'
-        # Unique side-view walking poses sampled from the Reel reference.
-        # Avoid moving a static cutout backwards over the scrolling field.
+        # The fourth pose previously switched to a different art style and changed
+        # the character's identity mid-walk. Lock head/hair/face/outfit from one
+        # base and animate only the legs and cape using compatible pixel poses.
         if state == 'walk':
-            source_index = (i - 4) % 4
+            source_index = (0, 1, 2, 1, 0, 1, 2, 1)[i - 4]
             src_path = ROOT / f'assets/characters/source/walk{source_index}/{name}.png'
-            src = Image.open(src_path).convert('RGBA') if src_path.exists() else base.copy()
+            if not src_path.is_file():
+                raise FileNotFoundError(src_path)
+            src = Image.open(src_path).convert('RGBA')
+            src.paste(base.crop((0, 0, CELL[0], 59)), (0, 0))
             shift = 0
             bounce = 0
         else:

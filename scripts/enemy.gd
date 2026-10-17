@@ -8,6 +8,7 @@ var alpha_foot_y := 0
 var health_ratio := 1.0
 var frozen := false
 var warned := false
+var facing_right: bool = true
 var time_value := 0.0
 var _sheet: Texture2D
 var _frame_w := 48
@@ -40,7 +41,11 @@ func _draw() -> void:
         var region := Rect2(float(frame*_frame_w),0,float(_frame_w),float(_frame_h))
         var bob := 1 if (int(floor(time_value * 5.0)) % 2) else 0
         var target := Rect2(-int(size.x / 2), -_frame_h + 4 - bob, _frame_w, _frame_h)
+        if facing_right:
+            draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0, 1.0))
         draw_texture_rect_region(_sheet,target,region)
+        if facing_right:
+            draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
     else:
         draw_rect(Rect2(-12,-32,24,28),Color.DARK_RED)
     var bar_w: int = int(size.x * 0.68)

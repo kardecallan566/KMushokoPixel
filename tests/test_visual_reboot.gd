@@ -21,7 +21,7 @@ func _run() -> void:
         hero.walking = true
         hero.facing_right = false
         hero.queue_redraw()
-        hero.facing_right = true
+        hero.facing_right = false  # Enemy approached from left.
         hero.play_attack()
         hero.queue_redraw()
         hero.queue_free()

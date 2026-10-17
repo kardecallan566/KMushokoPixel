@@ -110,3 +110,15 @@ godot .
 
 Se o teste relatar PNG inexistente, verifique os arquivos no diretório `assets/`.
 Não é necessário copiar a pasta `.godot/` de outro computador.
+
+## CP03D — Direção do grupo e animações consistentes
+
+A equipe caminha para a **esquerda**, como no Reel. Os monstros surgem
+**à esquerda** e olham para a direita, de frente para os heróis. Em combate,
+Eris assume a linha da frente e Rudeus/Sylphie/Roxy ficam atrás dela.
+Os oito frames da caminhada reutilizam uma única face/roupa por personagem:
+três poses de pernas e capas variam, mas não há troca de skin.
+
+Validação: `python tools/validate_walk_consistency.py` e
+`godot --headless --path . --script res://tests/test_party_direction.gd`.
+Detalhes em [CP03D](docs/CP03D_WALK_AND_ENCOUNTERS.md).

@@ -12,7 +12,7 @@ def validate():
             assert all(frame.getchannel('A').getbbox()[3] <= 96 for frame in frames),name
         with Image.open(ROOT/f'assets/characters/source/{name}.png') as original:
             assert original.size == (72,100),name
-        for i in range(4):
+        for i in range(3):
             assert (ROOT/f'assets/characters/source/walk{i}/{name}.png').exists()
     for n in ('clouds','mountains','treeline','meadow','foreground','details'):
         with Image.open(ROOT/f'assets/biomes/green_plains/{n}.png') as img:

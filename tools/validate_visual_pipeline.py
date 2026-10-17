@@ -18,7 +18,9 @@ def check():
     hero=(ROOT/'scripts/hero.gd').read_text()
     hud=(ROOT/'scripts/hud.gd').read_text()
     assert 'scroll_time - delta*19.0' in main,'direction must match Reel walk'
-    assert 'heroes[i].facing_right = session.phase == "combat"' in main
+    assert 'heroes[i].facing_right = false' in main
+    assert 'enemies[i].facing_right = true' in main
+    assert '0.87, 0.75, 0.64, 0.53' in main
     assert 'Vector2(-1.0,1.0)' in hero
     assert 'hud.z_index = 20' in main
     assert 'Rect2(x,y,block_width-3.0,25)' in hud

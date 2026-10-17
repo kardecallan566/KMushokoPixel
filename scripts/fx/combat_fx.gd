@@ -88,8 +88,9 @@ func _draw() -> void:
     for warning in warnings:
         var remain: float = clampf(float(warning["life"]) / float(warning["total"]),0.0,1.0)
         var flash: bool = int(remain * 16.0) % 2 == 0
-        var center_x: float = logical_size.x * 0.34 if warning["attack"] == "charge" else logical_size.x*0.51
-        var width: float = logical_size.x * (0.38 if warning["attack"] == "charge" else 0.90)
+        # Charge hits the front line; howl threatens the party on the right.
+        var center_x: float = logical_size.x * (0.64 if warning["attack"] == "charge" else 0.72)
+        var width: float = logical_size.x * (0.37 if warning["attack"] == "charge" else 0.53)
         var left: float = floor(center_x - width*0.5)
         var pigment := Color("#F27B68")
         pigment.a = 0.52 if flash else 0.27
