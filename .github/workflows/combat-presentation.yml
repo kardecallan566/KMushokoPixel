@@ -17,14 +17,18 @@ permissions:
 jobs:
   godot:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        godot_version: ['4.5.1', '4.7.2']
     steps:
       - uses: actions/checkout@v4
-      - name: Install Godot 4.5.1
+      - name: Install Godot ${{ matrix.godot_version }}
         run: |
           curl --fail --location --retry 3 --silent --show-error -o /tmp/godot.zip \
-            https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip
+            https://github.com/godotengine/godot/releases/download/${{ matrix.godot_version }}-stable/Godot_v${{ matrix.godot_version }}-stable_linux.x86_64.zip
           unzip -q /tmp/godot.zip -d /tmp
-          sudo install -m 755 /tmp/Godot_v4.5.1-stable_linux.x86_64 /usr/local/bin/godot
+          sudo install -m 755 /tmp/Godot_v${{ matrix.godot_version }}-stable_linux.x86_64 /usr/local/bin/godot
       - name: Import and parse project
         run: godot --headless --editor --path . --quit
       - name: Verify boss second phase, telegraphs, and FX
