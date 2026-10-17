@@ -83,7 +83,7 @@ func _update_layout() -> void:
     var traveling: bool = session.phase != "combat"
     # Leftward exploration from the Reel; enemies must be encountered on the LEFT.
     # Rudeus, Sylphie, Roxy, Eris: Eris is the forward-most fighter in combat.
-    var positions: Array[float] = [0.16, 0.31, 0.46, 0.61] if traveling else [0.87, 0.75, 0.64, 0.53]
+    var positions: Array = [0.16, 0.31, 0.46, 0.61] if traveling else [0.87, 0.75, 0.64, 0.53]
     for i in range(heroes.size()):
         heroes[i].position = Vector2(round(visible_size.x * positions[i]),int(baseline))
         heroes[i].preview_scale = 1.0
