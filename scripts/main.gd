@@ -62,7 +62,7 @@ func _ready() -> void:
     session.action_performed.connect(_on_action)
     session.phase_changed.connect(_on_phase_changed)
     session.progress_changed.connect(queue_redraw)
-    get_window().title = "KMushokoPixel — CP03 | Planicies Verdes"
+    get_window().title = "KMushokoPixel — Reboot Visual | Planicies Verdes"
     get_window().size_changed.connect(_update_layout)
     _update_layout()
 
@@ -74,30 +74,31 @@ func _update_layout() -> void:
     visible_size = Vector2(floor(visible_size.x),floor(visible_size.y))
     # Compact: 480x120 with dedicated 14px header/15px bottom strip.
     # Expanded: 384x216 with a 24px header and 26px bottom strip.
-    baseline = visible_size.y - (26.0 if window_mode.compact else 65.0)
+    baseline = visible_size.y - (10.0 if window_mode.compact else 39.0)
     scale = Vector2.ONE * logical_scale
     for layer in [background,foreground]:
         layer.view_size = visible_size
         layer.ground_y = baseline - 10.0
         layer.queue_redraw()
     var traveling: bool = session.phase != "combat"
-    var positions := [0.12,0.28,0.44,0.60] if traveling else [0.10,0.25,0.40,0.55]
+    var positions := [0.12,0.28,0.44,0.60] if window_mode.compact else [0.10,0.25,0.40,0.55]
     for i in range(heroes.size()):
         heroes[i].position = Vector2(round(visible_size.x * positions[i]),int(baseline))
         heroes[i].preview_scale = 1.0
+        heroes[i].facing_right = not traveling
         heroes[i].queue_redraw()
     for i in range(enemies.size()):
         # Reinforcements share the right side; never leave the viewport.
-        var enemy_x: float = visible_size.x * (0.74 + min(i,3)*0.075)
+        var enemy_x: float = visible_size.x * (0.78 + min(i,3)*0.067)
         enemies[i].position = Vector2(round(enemy_x),int(baseline))
         if i < session.enemies.size():
             enemies[i].sprite_scale = 1.0
             enemies[i].queue_redraw()
-    var bar_height := 14.0 if window_mode.compact else 23.0
-    _control_button = Rect2(visible_size.x - 29,2,26,bar_height-3)
-    _pause_button = Rect2(visible_size.x - 58,2,26,bar_height-3)
-    _upgrade_button = Rect2(4,visible_size.y-17,86,14)
-    _farm_button = Rect2(94,visible_size.y-17,76,14)
+    var bar_height := 12.0 if window_mode.compact else 19.0
+    _control_button = Rect2(visible_size.x - 15,1,14,bar_height-2)
+    _pause_button = Rect2(visible_size.x - 31,1,14,bar_height-2)
+    _upgrade_button = Rect2(1,visible_size.y-12,67,11)
+    _farm_button = Rect2(74,visible_size.y-12,77,11)
     if combat_fx != null:
         combat_fx.resize_to(visible_size, baseline)
     if hud != null:
@@ -107,13 +108,14 @@ func _process(delta: float) -> void:
     session.tick(delta)
     combat_fx.running = not session.paused
     if session.phase in ["travel","victory","defeat"] and not session.paused:
-        scroll_time = fmod(scroll_time + delta*19.0,96000.0)
+        scroll_time = fmod(scroll_time - delta*19.0,96000.0)
     background.camera_scroll = scroll_time
     foreground.camera_scroll = scroll_time
     background.queue_redraw()
     foreground.queue_redraw()
     for i in range(heroes.size()):
         heroes[i].walking = session.phase in ["travel","victory","defeat"] and not session.paused
+        heroes[i].facing_right = session.phase == "combat"
     for i in range(enemies.size()):
         if i >= session.enemies.size():
             continue
@@ -221,7 +223,6 @@ func _unhandled_input(event: InputEvent) -> void:
                 if window_mode.compact: _toggle_window()
         get_viewport().set_input_as_handled()
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-        # Explicitly narrow the event type: Godot 4.7 cannot infer Vector2 here.
         var mouse_event: InputEventMouseButton = event as InputEventMouseButton
         var point: Vector2 = mouse_event.position / logical_scale
         if _control_button.has_point(point):
@@ -232,7 +233,7 @@ func _unhandled_input(event: InputEvent) -> void:
             _try_upgrade()
         elif _farm_button.has_point(point):
             session.toggle_farm()
-        elif window_mode.compact and point.y <= 14:
+        elif window_mode.compact and point.y <= 12:
             DisplayServer.window_start_drag()
 
 func _try_upgrade() -> void:

@@ -1,64 +1,72 @@
 extends Node2D
+## CP03C: reel-guided character presentation. Frames keep feet anchored at (36,94).
+## Video-side silhouettes face LEFT: travel scrolls RIGHT. Combat flips to face foes.
 const TextureLoader = preload("res://scripts/utils/texture_loader.gd")
-## Displays hand-authored 48x60 sprite-sheet frames.
-## Cells 0-3: idle; cells 4-9: walk. Strict nearest-neighbor rendering.
+const FRAME_SIZE := Vector2i(72,100)
+const WALK_FIRST := 4
+const WALK_FRAMES := 8
+const CAST_FIRST := 12
+const CAST_FRAMES := 6
+const HIT_FIRST := 18
+const HIT_FRAMES := 2
 
-const FRAME_SIZE := Vector2i(48, 60)
-const FRAME_COUNTS := {"idle": 4, "walk": 6}
-
-var hero_id := "rudeus"
-var preview_scale := 1.0
-var walking := true
-var elapsed := 0.0
-var anim_fps := 8.0
+var hero_id: String = "rudeus"
+var preview_scale: float = 1.0
+var walking: bool = true
+var facing_right: bool = false
+var elapsed: float = 0.0
+var anim_fps: float = 8.0
+var attack_flash: float = 0.0
+var hit_flash: float = 0.0
 var _sheet: Texture2D
-var attack_flash := 0.0
 var _effect_texture: Texture2D
-var _effect_frame_count := 6
 
 func _ready() -> void:
     texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
-
-func play_attack() -> void:
-    attack_flash = 0.30
-    queue_redraw()
-
 func configure(id: String) -> void:
     hero_id = id
-    var path := "res://assets/characters/%s_sheet.png" % hero_id
-    _sheet = TextureLoader.load_png(path)
-    var effect_path := "res://assets/effects/%s_cast.png" % hero_id
-    _effect_texture = TextureLoader.load_png(effect_path)
+    _sheet = TextureLoader.load_png("res://assets/characters/%s_sheet.png" % id)
+    _effect_texture = TextureLoader.load_png("res://assets/effects/%s_cast.png" % id)
+    queue_redraw()
+
+func play_attack() -> void:
+    attack_flash = 0.42
+    queue_redraw()
+
+func play_hit() -> void:
+    hit_flash = 0.22
     queue_redraw()
 
 func _process(delta: float) -> void:
-    attack_flash = maxf(0.0,attack_flash - delta)
-    if walking:
-        elapsed = fmod(elapsed + delta, 600.0)
-    else:
-        elapsed = fmod(elapsed + delta * 0.4, 600.0)
+    if attack_flash > 0.0:
+        attack_flash = maxf(0.0,attack_flash-delta)
+    if hit_flash > 0.0:
+        hit_flash = maxf(0.0,hit_flash-delta)
+    elapsed = fmod(elapsed+delta,1000.0)
     queue_redraw()
 
 func _draw() -> void:
-    var c := Color(0.17, 0.39, 0.33, 0.27)
-    draw_rect(Rect2(-15.0, -1.0, 30.0, 3.0), c)
+    draw_rect(Rect2(-18,-1,35,2),Color(0.07,0.25,0.21,0.27))
     if _sheet == null:
-        draw_rect(Rect2(-8.0, -48.0, 16.0, 48.0), Color(0.25,0.18,0.35))
-        return
-    var count := FRAME_COUNTS["walk"] if walking else FRAME_COUNTS["idle"]
-    var first := 4 if walking else 0
-    var index: int = first + (int(floor(elapsed * anim_fps)) % count)
-    var src := Rect2(float(index * FRAME_SIZE.x), 0.0, FRAME_SIZE.x, FRAME_SIZE.y)
-    # Anchor source feet at y=54 and x=24; pixel-snap viewport transforms.
-    # Draw every sprite on the same 1:1 pixel grid. The parent scales by x2 or x3.
-    # Sprite-sheet's shared foot anchor is at (24,54); no fractional zoom or jitter.
-    var destination := Rect2(-24, -54, FRAME_SIZE.x, FRAME_SIZE.y)
-    draw_texture_rect_region(_sheet, destination, src)
-    if attack_flash > 0.0 and _effect_texture != null:
-        var progress: float = clampf((0.30 - attack_flash) / 0.30, 0.0, 0.999)
-        var frame: int = mini(5, int(floor(progress * float(_effect_frame_count))))
-        var fx_region := Rect2(frame * 32, 0, 32, 32)
-        # The hand anchor is stable; magic and sword effects have dedicated colors.
-        var fx_pos := Vector2(6,-46) if hero_id != "eris" else Vector2(9,-46)
-        draw_texture_rect_region(_effect_texture,Rect2(fx_pos,Vector2(32,32)),fx_region)
+        return # Never replace missing hero art with placeholder rectangles.
+    var frame: int = 0
+    if hit_flash>0.0:
+        frame = HIT_FIRST + (int(floor((0.22-hit_flash)*10.0)) % HIT_FRAMES)
+    elif attack_flash>0.0:
+        frame = CAST_FIRST + mini(CAST_FRAMES-1,int(floor((0.42-attack_flash)/0.42*CAST_FRAMES)))
+    elif walking:
+        frame = WALK_FIRST + (int(floor(elapsed*anim_fps))%WALK_FRAMES)
+    else:
+        frame = int(floor(elapsed*3.0))%4
+    var src := Rect2(float(frame*FRAME_SIZE.x),0.0,float(FRAME_SIZE.x),float(FRAME_SIZE.y))
+    if facing_right:
+        draw_set_transform(Vector2.ZERO,0.0,Vector2(-1.0,1.0))
+    draw_texture_rect_region(_sheet,Rect2(-36,-94,72,100),src)
+    if attack_flash>0.0 and _effect_texture!=null:
+        var effect_frame: int = mini(5,int(floor((0.42-attack_flash)/0.42*6.0)))
+        var effect_region := Rect2(effect_frame*32,0,32,32)
+        var off := Vector2(-39,-60) if hero_id != "eris" else Vector2(-42,-63)
+        draw_texture_rect_region(_effect_texture,Rect2(off,Vector2(32,32)),effect_region)
+    if facing_right:
+        draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
