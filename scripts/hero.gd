@@ -1,4 +1,5 @@
 extends Node2D
+const TextureLoader = preload("res://scripts/utils/texture_loader.gd")
 ## Displays hand-authored 48x60 sprite-sheet frames.
 ## Cells 0-3: idle; cells 4-9: walk. Strict nearest-neighbor rendering.
 
@@ -26,13 +27,9 @@ func play_attack() -> void:
 func configure(id: String) -> void:
     hero_id = id
     var path := "res://assets/characters/%s_sheet.png" % hero_id
-    if ResourceLoader.exists(path):
-        _sheet = load(path) as Texture2D
+    _sheet = TextureLoader.load_png(path)
     var effect_path := "res://assets/effects/%s_cast.png" % hero_id
-    if ResourceLoader.exists(effect_path):
-        _effect_texture = load(effect_path) as Texture2D
-    else:
-        push_warning("Missing sprite asset: %s. Run python tools/generate_assets.py." % path)
+    _effect_texture = TextureLoader.load_png(effect_path)
     queue_redraw()
 
 func _process(delta: float) -> void:

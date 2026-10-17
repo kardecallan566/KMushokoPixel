@@ -1,4 +1,5 @@
 extends Node2D
+const TextureLoader = preload("res://scripts/utils/texture_loader.gd")
 ## Original hand-generated parallax for CP01A. Pure presentation layer.
 
 var view_size := Vector2(480, 240)
@@ -11,10 +12,9 @@ func _ready() -> void:
     texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
     for key in ["clouds", "mountains", "treeline", "meadow", "foreground"]:
         var path := "res://assets/biomes/green_plains/%s.png" % key
-        if ResourceLoader.exists(path):
-            _tex[key] = load(path) as Texture2D
-        else:
-            push_warning("Missing parallax texture: " + path)
+        var texture: Texture2D = TextureLoader.load_png(path)
+        if texture != null:
+            _tex[key] = texture
 
 func _tile(key: String, y: float, speed: float, x_shift: float = 0.0) -> void:
     if not _tex.has(key):

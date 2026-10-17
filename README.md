@@ -1,6 +1,6 @@
 # KMushokoPixel — Checkpoint 03
 
-**RPG idle lateral em pixel art para Godot 4.5.1**, com visual inspirado no Reel de referência (Rudeus, Sylphie, Roxy e Eris) e ciclo de fases/chefes inspirado em Task Bar Hero.
+**RPG idle lateral em pixel art para Godot 4.7.2**, com visual inspirado no Reel de referência (Rudeus, Sylphie, Roxy e Eris) e ciclo de fases/chefes inspirado em Task Bar Hero.
 
 O projeto mantém o cenário de paralaxe e o quarteto do CP01A. Agora é **jogável**: 10 fases, 6 tipos de monstros em pixel art original, um elite (fase 5), um chefe (fase 10), combate automático de 4 heróis com habilidades diferentes, XP, ouro, evolução de equipe e salvamento de progresso. Após o primeiro chefe, ativa farm da fase 9.
 
@@ -67,3 +67,20 @@ godot --headless --path . --quit-after 120
 Veja [detalhes e limitações do checkpoint](docs/CP02_IMPLEMENTATION.md), [planejamento de jogo](docs/GDD.md) e [direção visual fiel ao Reel](docs/ART_BIBLE.md).
 
 **Status artístico:** o estilo é uma primeira aproximação do Reel, não uma cópia perfeita. Os sprites continuam passíveis de refinamento visual. Não há imagens copiadas do vídeo nas assets do jogo. Personagens de Mushoku Tensei pertencem a seus detentores e requerem atenção aos direitos antes da distribuição.
+
+## Correção do primeiro início após git clone (Godot 4.7.2)
+
+No primeiro `godot .`, o cache `.godot/imported` ainda pode não existir.
+O jogo agora tenta carregar as texturas importadas e, quando o cache está
+ausente, lê os PNGs reais de `assets/` com `Image.load`. Assim, céu,
+montanhas, árvores, heróis e monstros não viram retângulos de emergência.
+
+Verifique a instalação limpa **antes de abrir o editor**:
+
+```sh
+godot --headless --path . --script res://tests/test_asset_loading.gd
+godot .
+```
+
+O teste confere os 19 PNGs essenciais e falha se qualquer textura não carregar.
+O GitHub Actions executa esse teste antes do processo de importação do Godot.

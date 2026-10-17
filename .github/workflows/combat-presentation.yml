@@ -4,12 +4,16 @@ on:
     paths:
       - 'scripts/**'
       - 'tests/test_boss_mechanics.gd'
+      - 'tests/test_asset_loading.gd'
+      - 'assets/**'
       - 'project.godot'
       - '.github/workflows/combat-presentation.yml'
   pull_request:
     paths:
       - 'scripts/**'
       - 'tests/test_boss_mechanics.gd'
+      - 'tests/test_asset_loading.gd'
+      - 'assets/**'
       - 'project.godot'
       - '.github/workflows/combat-presentation.yml'
 permissions:
@@ -29,6 +33,18 @@ jobs:
             https://github.com/godotengine/godot/releases/download/${{ matrix.godot_version }}-stable/Godot_v${{ matrix.godot_version }}-stable_linux.x86_64.zip
           unzip -q /tmp/godot.zip -d /tmp
           sudo install -m 755 /tmp/Godot_v${{ matrix.godot_version }}-stable_linux.x86_64 /usr/local/bin/godot
+      - name: Verify source textures on first launch (no import cache)
+        run: |
+          test ! -d .godot/imported
+          godot --headless --path . --script res://tests/test_asset_loading.gd
+      - name: Fresh-checkout scene smoke test
+        run: |
+          set -o pipefail
+          godot --headless --path . --quit-after 60 2>&1 | tee /tmp/first-launch.log
+          if grep -E "Missing parallax texture|Missing sprite asset|Missing enemy sheet|missing required PNG file|cannot decode PNG" /tmp/first-launch.log; then
+            echo "The game rendered with missing textures"
+            exit 1
+          fi
       - name: Import and parse project
         run: godot --headless --editor --path . --quit
       - name: Verify boss second phase, telegraphs, and FX
