@@ -81,18 +81,22 @@ func _update_layout() -> void:
         layer.ground_y = baseline - 10.0
         layer.queue_redraw()
     var traveling: bool = session.phase != "combat"
-    var positions := [0.12,0.28,0.44,0.60] if window_mode.compact else [0.10,0.25,0.40,0.55]
+    # Leftward exploration from the Reel; enemies must be encountered on the LEFT.
+    # Rudeus, Sylphie, Roxy, Eris: Eris is the forward-most fighter in combat.
+    var positions: Array[float] = [0.16, 0.31, 0.46, 0.61] if traveling else [0.87, 0.75, 0.64, 0.53]
     for i in range(heroes.size()):
         heroes[i].position = Vector2(round(visible_size.x * positions[i]),int(baseline))
         heroes[i].preview_scale = 1.0
-        heroes[i].facing_right = not traveling
+        heroes[i].facing_right = false  # Face left during travel and combat.
         heroes[i].queue_redraw()
     for i in range(enemies.size()):
         # Reinforcements share the right side; never leave the viewport.
-        var enemy_x: float = visible_size.x * (0.78 + min(i,3)*0.067)
+        # Monster pack stands ahead of the left-facing party.
+        var enemy_x: float = visible_size.x * (0.16 + min(i, 3) * 0.10)
         enemies[i].position = Vector2(round(enemy_x),int(baseline))
         if i < session.enemies.size():
             enemies[i].sprite_scale = 1.0
+            enemies[i].facing_right = true  # Flip body; keep HP text readable.
             enemies[i].queue_redraw()
     var bar_height := 12.0 if window_mode.compact else 19.0
     _control_button = Rect2(visible_size.x - 15,1,14,bar_height-2)
@@ -115,7 +119,7 @@ func _process(delta: float) -> void:
     foreground.queue_redraw()
     for i in range(heroes.size()):
         heroes[i].walking = session.phase in ["travel","victory","defeat"] and not session.paused
-        heroes[i].facing_right = session.phase == "combat"
+        heroes[i].facing_right = false
     for i in range(enemies.size()):
         if i >= session.enemies.size():
             continue
@@ -171,14 +175,14 @@ func _on_action(action: Dictionary) -> void:
     _status_text = String(action.get("text",""))
     _status_color = Color(String(action.get("color","#FFFFFF")))
     _status_time = 1.4 if action.get("kind") not in ["reward","defeat"] else 3.0
-    var source := Vector2(visible_size.x*0.81,baseline-27)
-    var target := Vector2(visible_size.x*0.78,baseline-30)
+    var source := Vector2(visible_size.x*0.72,baseline-27)
+    var target := Vector2(visible_size.x*0.16,baseline-30)
     var source_id: String = String(action.get("hero",""))
     var hero_index: int = PARTY.find(source_id)
     if hero_index >= 0:
         source = heroes[hero_index].position + Vector2(0,-28)
     if action.get("kind") == "enemy":
-        target = source if hero_index >= 0 else Vector2(visible_size.x*0.33,baseline-25)
+        target = source if hero_index >= 0 else Vector2(visible_size.x*0.72,baseline-25)
         source = _enemy_position(String(action.get("target","")))
     elif action.get("kind") in ["heal","shield"]:
         var ally_i: int = PARTY.find(String(action.get("target","")))
@@ -200,7 +204,7 @@ func _enemy_position(enemy_id: String) -> Vector2:
     for i in range(mini(session.enemies.size(),enemies.size())):
         if String(session.enemies[i].get("id","")) == enemy_id:
             return enemies[i].position + Vector2(0,-28)
-    return Vector2(visible_size.x*0.8,baseline-30)
+    return Vector2(visible_size.x*0.16,baseline-30)
 
 func _toggle_window() -> void:
     window_mode.apply(get_window(),not window_mode.compact)
