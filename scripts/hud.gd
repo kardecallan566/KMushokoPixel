@@ -53,8 +53,15 @@ func _draw() -> void:
         _text(Vector2(8,57),"COMBATE | INIMIGOS %d" % alive,9,Color("#FFF3CF"))
         _bar(Vector2(8,61),minf(visible_size.x*0.40,157.0),4,total_hp/maxf(1,total_max),Color("#E27A68"))
         if session.boss_telegraph:
-            draw_rect(Rect2(visible_size.x*0.46,28,visible_size.x*0.48,20),Color("#773644"))
-            _text(Vector2(visible_size.x*0.47,42),"ATAQUE DO CHEFE!",9,Color("#FFF1D5"))
+            var boss_attack := "INVESTIDA"
+            for foe in session.enemies:
+                if bool(foe.get("boss",false)) and float(foe.get("windup_left",0.0)) > 0:
+                    boss_attack = "UIVO EM AREA" if String(foe.get("attack_id","")) == "howl" else "INVESTIDA"
+                    break
+            draw_rect(Rect2(visible_size.x*0.50,28,visible_size.x*0.45,20),Color("#773644"))
+            _text(Vector2(visible_size.x*0.51,42),"PERIGO: " + boss_attack,9,Color("#FFF1D5"))
+        elif session.boss_phase == 2 and session.phase == "combat":
+            _text(Vector2(visible_size.x*0.62,40),"FASE 2: FURIA",9,Color("#F8A38A"))
     if _status_time > 0.0 and not window_mode.compact:
         var text_len: float = minf(visible_size.x-10.0,maxf(140.0,_status_text.length()*5.2))
         draw_rect(Rect2(floor((visible_size.x-text_len)/2),75,ceil(text_len),17),Color("#20313A"))
@@ -75,6 +82,10 @@ func _draw() -> void:
         _text(Vector2(10,visible_size.y-7),"UP %d" % session.upgrade_cost(),8,Color("#E8FFE1"))
         _text(Vector2(101,visible_size.y-7),"FARM %s" % ("ON" if session.farm_mode else "OFF"),8,Color.WHITE)
         _text(Vector2(visible_size.x-91,visible_size.y-7),"TAB EXPANDIR",8,Color("#D5E8EB"))
+        if session.boss_telegraph:
+            var compact_bar: Color = Color("#FF9975")
+            draw_rect(Rect2(visible_size.x*0.62,15,visible_size.x*0.30,3),compact_bar)
+            _text(Vector2(visible_size.x*0.62,27),"PERIGO: CHEFE",8,Color("#FFE6DC"))
         # Four unobtrusive HP pips rather than cards covering characters.
         var hp_x := 180
         for h in session.heroes:

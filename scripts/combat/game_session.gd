@@ -6,6 +6,7 @@ signal encounter_started(stage_number: int, enemies: Array)
 signal action_performed(payload: Dictionary)
 signal phase_changed(phase_name: String)
 signal progress_changed()
+signal enemy_summoned(enemy: Dictionary)
 
 const DT := 0.1
 const SAVE_VERSION := 1
@@ -29,6 +30,7 @@ var paused := false
 var time_elapsed := 0.0
 var travel_left := 2.2
 var boss_telegraph := false
+var boss_phase := 1
 var heroes: Array = []
 var enemies: Array = []
 var _accum := 0.0
@@ -121,26 +123,58 @@ func _begin_fight() -> void:
         return
     phase = "combat"
     boss_telegraph = false
+    boss_phase = 1
     _battle_clock = 0.0
     enemies.clear()
     var stage: Dictionary = _stages[clampi(stage_number - 1, 0, _stages.size() - 1)]
     for id in stage.get("enemies", []):
-        if not _enemy_db.has(String(id)):
-            continue
-        var raw: Dictionary = _enemy_db[String(id)]
-        var hp_value: int = int(raw.get("hp", 40)) + maxi(0, stage_number - 1) * (6 if not raw.get("boss", false) else 13)
-        enemies.append({"id":id, "name":raw["name"], "sprite":raw["sprite"], "hp":hp_value,
-            "max_hp":hp_value,"attack":raw["attack"], "attack_interval":raw["attack_interval"],
-            "defense":raw.get("defense",0), "gold":raw.get("gold",0), "scale":raw.get("scale",1.0),
-            "boss":raw.get("boss",false),"elite":raw.get("elite",false),
-            "windup":raw.get("windup",0.0),"windup_left":0.0, "ready":float(raw["attack_interval"]),
-            "wet":0.0,"frozen":0.0,"armor_broken":0.0})
+        var foe := _make_enemy(String(id))
+        if not foe.is_empty():
+            enemies.append(foe)
     if enemies.is_empty():
         phase = "error"
         push_error("No enemies for stage " + str(stage_number))
         return
     encounter_started.emit(stage_number, enemies)
     phase_changed.emit(phase)
+
+func _make_enemy(enemy_id: String) -> Dictionary:
+    if not _enemy_db.has(enemy_id):
+        return {}
+    var raw: Dictionary = _enemy_db[enemy_id]
+    var boss: bool = bool(raw.get("boss", false))
+    var hp_value: int = int(raw.get("hp", 40)) + maxi(0, stage_number - 1) * (13 if boss else 6)
+    return {"id":enemy_id,"name":raw["name"],"sprite":raw["sprite"],"hp":hp_value,
+        "max_hp":hp_value,"attack":raw["attack"],"attack_interval":raw["attack_interval"],
+        "defense":raw.get("defense",0),"gold":raw.get("gold",0),"scale":raw.get("scale",1.0),
+        "boss":boss,"elite":raw.get("elite",false),"boss_phase":1,"attack_count":0,
+        "attack_id":"charge","windup":raw.get("windup",0.0),"windup_left":0.0,
+        "ready":float(raw["attack_interval"]),"wet":0.0,"frozen":0.0,"armor_broken":0.0}
+
+func _check_boss_transition() -> void:
+    if boss_phase == 2:
+        return
+    for enemy in enemies:
+        if not bool(enemy.get("boss", false)) or int(enemy["hp"]) <= 0:
+            continue
+        if float(enemy["hp"]) / maxf(1.0,float(enemy["max_hp"])) > 0.55:
+            continue
+        boss_phase = 2
+        enemy["boss_phase"] = 2
+        enemy["ready"] = maxf(0.9,float(enemy["ready"]))
+        action_performed.emit({"kind":"boss_phase","text":"LOBO ALFA: FURIA DA MATILHA!",
+            "hero":"","target":enemy["id"],"color":"#FF9D72","phase":2})
+        # Once per battle. Enemies are standard data-driven records and earn normal rewards.
+        for i in range(2):
+            var minion := _make_enemy("wolf")
+            if not minion.is_empty():
+                # Reinforcements must survive long enough to be noticeable.
+                minion["ready"] = 1.0 + float(i)*0.5
+                enemies.append(minion)
+                enemy_summoned.emit(minion)
+        action_performed.emit({"kind":"summon","text":"REFORCOS DA MATILHA!",
+            "hero":"","target":enemy["id"],"color":"#FFCA89"})
+        break
 
 func _battle_step() -> void:
     _battle_clock += DT
@@ -152,18 +186,29 @@ func _battle_step() -> void:
             enemy[key] = maxf(0.0, float(enemy[key]) - DT)
         enemy["ready"] = float(enemy["ready"]) - DT
         if float(enemy["windup_left"]) > 0.0:
-            enemy["windup_left"] = maxf(0.0, float(enemy["windup_left"]) - DT)
-            boss_telegraph = true
-            if float(enemy["windup_left"]) <= 0.0:
-                _enemy_attack(enemy, true)
-                enemy["ready"] = float(enemy["attack_interval"])
+            if float(enemy["frozen"]) > 0.0:
+                enemy["windup_left"] = 0.0
+                enemy["ready"] = 1.1
+                action_performed.emit({"kind":"interrupt","text":"MAGIA INTERROMPIDA!",
+                    "target":enemy["id"],"color":"#B6F4FF"})
+            else:
+                enemy["windup_left"] = maxf(0.0, float(enemy["windup_left"]) - DT)
+                boss_telegraph = true
+                if float(enemy["windup_left"]) <= 0.0:
+                    _enemy_attack(enemy, true)
+                    enemy["ready"] = float(enemy["attack_interval"]) * (0.85 if boss_phase == 2 else 1.0)
         elif float(enemy["ready"]) <= 0.0:
             if float(enemy["frozen"]) > 0.0:
                 enemy["ready"] = 0.35
             elif bool(enemy["boss"]):
-                enemy["windup_left"] = float(enemy["windup"])
+                enemy["attack_id"] = "howl" if boss_phase == 2 and int(enemy["attack_count"]) % 2 == 1 else "charge"
+                enemy["attack_count"] = int(enemy["attack_count"]) + 1
+                enemy["windup_left"] = float(enemy["windup"]) + (0.45 if enemy["attack_id"] == "howl" else 0.0)
                 boss_telegraph = true
-                action_performed.emit({"kind":"telegraph","text":"LOBO ALFA prepara INVESTIDA!", "color":"#FF9975"})
+                action_performed.emit({"kind":"telegraph","attack_id":enemy["attack_id"],
+                    "target":enemy["id"],"duration":enemy["windup_left"],
+                    "text":"LOBO ALFA: UIVO SOMBRIO!" if enemy["attack_id"] == "howl" else "LOBO ALFA: INVESTIDA!",
+                    "color":"#FF9975"})
             else:
                 _enemy_attack(enemy, false)
                 enemy["ready"] = float(enemy["attack_interval"])
@@ -173,6 +218,7 @@ func _battle_step() -> void:
         hero["ready"] = float(hero["ready"]) - DT
         if float(hero["ready"]) <= 0.0:
             _hero_action(hero)
+    _check_boss_transition()
     if _living_enemies().is_empty():
         _victory()
     elif _living_heroes().is_empty():
@@ -269,10 +315,10 @@ func _hero_action(hero: Dictionary) -> void:
             if effect == "heal":
                 var gained: int = mini(power, get_max_hp(ally) - int(ally["hp"]))
                 ally["hp"] = int(ally["hp"]) + gained
-                action_performed.emit({"kind":"heal","hero":hero["id"],"target":ally["id"],"amount":gained,"text":chosen["name"],"color":chosen["color"]})
+                action_performed.emit({"kind":"heal","hero":hero["id"],"target":ally["id"],"amount":gained,"skill_id":skill_key,"effect":effect,"text":chosen["name"],"color":chosen["color"]})
             else:
                 ally["shield"] = mini(70, int(ally["shield"]) + power)
-                action_performed.emit({"kind":"shield","hero":hero["id"],"target":ally["id"],"amount":power,"text":chosen["name"],"color":chosen["color"]})
+                action_performed.emit({"kind":"shield","hero":hero["id"],"target":ally["id"],"amount":power,"skill_id":skill_key,"effect":effect,"text":chosen["name"],"color":chosen["color"]})
         return
     if effect == "aoe":
         for foe in _living_enemies():
@@ -293,29 +339,38 @@ func _hit(hero: Dictionary, enemy: Dictionary, power: int, effect: String, skill
             enemy["frozen"] = 2.6
             enemy["wet"] = 0.0
     action_performed.emit({"kind":"damage","hero":hero["id"],"target":enemy["id"],
-        "amount":damage,"text":skill["name"],"color":skill["color"]})
+        "amount":damage,"skill_id":skill["id"],"effect":effect,
+        "text":skill["name"],"color":skill["color"]})
+
+func _apply_enemy_damage(enemy: Dictionary, target: Dictionary, amount: int, attack_name: String) -> void:
+    var absorbed: int = mini(amount, int(target["shield"]))
+    target["shield"] = int(target["shield"]) - absorbed
+    var damage: int = amount - absorbed
+    target["hp"] = maxi(0, int(target["hp"]) - damage)
+    action_performed.emit({"kind":"enemy","hero":target["id"],"target":enemy["id"],
+        "amount":damage,"absorbed":absorbed,"effect":attack_name,
+        "text": "Uivo Sombrio" if attack_name == "howl" else "INVESTIDA!" if attack_name == "charge" else String(enemy["name"]),
+        "color":"#FF988B"})
 
 func _enemy_attack(enemy: Dictionary, empowered: bool) -> void:
     var alive := _living_heroes()
     if alive.is_empty():
+        return
+    var damage: int = int(enemy["attack"]) + maxi(0,stage_number - 1)
+    if empowered and String(enemy.get("attack_id","charge")) == "howl":
+        for target in alive:
+            _apply_enemy_damage(enemy, target, maxi(1,int(round(damage * 0.65))), "howl")
         return
     var target: Dictionary = alive[0]
     for hero in alive:
         if String(hero["combat_position"]) == "front":
             target = hero
             break
-    # A little variety while preserving a predictable frontliner role.
     if _rng.randf() > 0.74:
-        target = alive[_rng.randi_range(0, alive.size()-1)]
-    var damage: int = int(enemy["attack"]) + maxi(0, stage_number - 1)
+        target = alive[_rng.randi_range(0,alive.size()-1)]
     if empowered:
-        damage = int(round(damage * 1.6))
-    var absorbed: int = mini(damage, int(target["shield"]))
-    target["shield"] = int(target["shield"]) - absorbed
-    damage -= absorbed
-    target["hp"] = maxi(0,int(target["hp"]) - damage)
-    action_performed.emit({"kind":"enemy","hero":target["id"],"target":enemy["id"],
-        "amount":damage,"text": "INVESTIDA!" if empowered else String(enemy["name"]),"color":"#FF988B"})
+        damage = int(round(damage * (1.9 if boss_phase == 2 else 1.6)))
+    _apply_enemy_damage(enemy, target, damage, "charge" if empowered else "claw")
 
 func _victory() -> void:
     phase = "victory"

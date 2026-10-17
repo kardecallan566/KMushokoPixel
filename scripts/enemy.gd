@@ -1,4 +1,5 @@
 extends Node2D
+const TextureLoader = preload("res://scripts/utils/texture_loader.gd")
 ## Animated original retro monster sprite. Battle logic is owned by GameSession.
 
 var enemy_id := "slime"
@@ -19,13 +20,11 @@ func configure(data: Dictionary) -> void:
     enemy_id = String(data.get("sprite",data.get("id","slime")))
     sprite_scale = float(data.get("scale",1.0))
     var texture_path := "res://assets/enemies/%s_sheet.png" % enemy_id
-    if ResourceLoader.exists(texture_path):
-        _sheet = load(texture_path) as Texture2D
+    _sheet = TextureLoader.load_png(texture_path)
+    if _sheet != null:
         _frame_w = int(_sheet.get_width()/4)
         _frame_h = _sheet.get_height()
         alpha_foot_y = _frame_h - 4
-    else:
-        push_warning("Missing enemy sheet " + texture_path)
     queue_redraw()
 
 func _process(delta: float) -> void:
